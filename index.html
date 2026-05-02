@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="./src/style.css" rel="stylesheet" />
+    <title>ChatBot</title>
+  </head>
+  <body>
+    <div class="container">
+      <span class="title">Pitaya 2.0</span>
+
+      <div class="content" id="content">
+        <!-- Menssages will be displayed here -->
+      </div>
+
+      <div class="ctls">
+        <form action="">
+          <input
+            type="text"
+            id="input"
+            placeholder="Let's chat!"
+            autocomplete="off"
+          />
+          <button id="button" type="submit" onclick="sendMessage(); return false;">
+            <img src="./src/Assets/right-arrow.png" alt="Send"/>
+          </button>
+
+        </form>
+        <span>© 2026 George Lucas. All rights reserved.</span>
+      </div>
+    </div>
+    <script src="./script.js"></script>
+    <script>
+      window.onload = async () => {
+        await carregarWhoIm();
+
+        const input = document.getElementById("input");
+        input.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") sendMessage();
+        });
+      };
+    </script>
+  </body>
+</html>
