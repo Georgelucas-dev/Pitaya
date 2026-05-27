@@ -60,29 +60,29 @@ async function sendMessage() {
 
 let waitingResponseDiv = null;
 function dots() {
-    waitingResponseDiv = document.createElement("div");
-    waitingResponseDiv.classList.add("dots");
-    const dot1 = document.createElement("span");
-    const dot2 = document.createElement("span");
-    const dot3 = document.createElement("span");
-    dot1.classList.add("dot");
-    dot2.classList.add("dot");
-    dot3.classList.add("dot");
-    dot1.innerHTML = "•";
-    dot2.innerHTML = "•";
-    dot3.innerHTML = "•";
-    waitingResponseDiv.appendChild(dot1);
-    waitingResponseDiv.appendChild(dot2);
-    waitingResponseDiv.appendChild(dot3);
-    const avatar = document.createElement("div");
-    avatar.classList.add("avatar");
-    avatar.innerHTML = "Pita";
-    const messageRow = document.createElement("div");
-    messageRow.classList.add("message-row-bot");
-    messageRow.classList.add("waiting-response");
-    messageRow.appendChild(avatar);
-    messageRow.appendChild(waitingResponseDiv);
-    container.appendChild(messageRow);
+  waitingResponseDiv = document.createElement("div");
+  waitingResponseDiv.classList.add("dots");
+  const dot1 = document.createElement("span");
+  const dot2 = document.createElement("span");
+  const dot3 = document.createElement("span");
+  dot1.classList.add("dot");
+  dot2.classList.add("dot");
+  dot3.classList.add("dot");
+  dot1.innerHTML = "•";
+  dot2.innerHTML = "•";
+  dot3.innerHTML = "•";
+  waitingResponseDiv.appendChild(dot1);
+  waitingResponseDiv.appendChild(dot2);
+  waitingResponseDiv.appendChild(dot3);
+  const avatar = document.createElement("div");
+  avatar.classList.add("avatar");
+  avatar.innerHTML = "Pita";
+  const messageRow = document.createElement("div");
+  messageRow.classList.add("message-row-bot");
+  messageRow.classList.add("waiting-response");
+  messageRow.appendChild(avatar);
+  messageRow.appendChild(waitingResponseDiv);
+  container.appendChild(messageRow);
 }
 
 // Lógica principal do chat com Groq
@@ -180,7 +180,6 @@ function mdToHtml(texto) {
     .replace(/\*(.*?)\*/g, "<em>$1</em>") // italic
     .replace(/`(.*?)`/g, "<code>$1</code>"); // code
 }
-
 
 function clearInput() {
   document.getElementById("input").value = "";
