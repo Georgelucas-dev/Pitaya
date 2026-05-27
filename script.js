@@ -1,10 +1,8 @@
-const container = document.querySelector(".content");
-const WaitingResponse = document.createElement("div");
-const MessageRow = document.createElement("div");
+const output = document.getElementById('typing-area');
+const input = document.getElementById('input');
 
 let whoIm = null;
 let messages = [];
-console.log(messages);
 
 async function carregarWhoIm() {
   if (whoIm) return whoIm;
@@ -14,82 +12,98 @@ async function carregarWhoIm() {
   return whoIm;
 }
 
-const welcome = document.createElement("div");
-container.style.justifyContent = "center";
-welcome.classList.add("welcome");
-welcome.innerHTML = "Hey Lucas, ready to dive in?";
-container.appendChild(welcome);
-
-let executed = true;
-
-function greetins() {
-  if (executed) {
-    container.removeChild(welcome);
-    container.style.justifyContent = "flex-start";
-    executed = false;
-  }
+function now() {
+  return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
-// Envia mensagem do usuário na tela
-async function sendMessage() {
-  const input = document.getElementById("input");
-  const texto = input.value.trim();
+function addLine(cls, text) {
+  const d = document.createElement('div');
+  d.className = 'line ' + cls;
+  d.innerHTML = text;
+  output.appendChild(d);
+  const outputDiv = document.getElementById('output');
+  outputDiv.scrollTop = outputDiv.scrollHeight;
+}
 
+function typeLines(lines, idx = 0) {
+  if (idx >= lines.length) return;
+  const { cls, text } = lines[idx];
+  addLine(cls, text);
+  setTimeout(() => typeLines(lines, idx + 1), 80);
+}
+
+const spinFrames = ['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏'];
+let spinInterval = null;
+
+function startSpinner() {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'line spinner-line';
+  wrapper.id = 'spinner';
+  const spin = document.createElement('span');
+  spin.className = 'spin-char';
+  spin.textContent = spinFrames[0];
+  const lbl = document.createElement('span');
+  lbl.className = 'c-muted';
+  lbl.style.fontSize = '13px';
+  lbl.textContent = 'pitaya está pensando...';
+  wrapper.appendChild(spin);
+  wrapper.appendChild(lbl);
+  output.appendChild(wrapper);
+  let f = 0;
+  spinInterval = setInterval(() => {
+    f = (f + 1) % spinFrames.length;
+    spin.textContent = spinFrames[f];
+  }, 80);
+  
+  const outputDiv = document.getElementById('output');
+  outputDiv.scrollTop = outputDiv.scrollHeight;
+}
+
+function stopSpinner() {
+  clearInterval(spinInterval);
+  const s = document.getElementById('spinner');
+  if (s) s.remove();
+}
+
+async function sendMessage() {
+  const texto = input.value.trim();
   if (!texto) return;
 
-  greetins();
-  const messageRow = document.createElement("div");
-  const userDiv = document.createElement("div");
-  const avatar = document.createElement("div");
-  messageRow.classList.add("message-row-user");
-  container.appendChild(messageRow);
-  avatar.classList.add("avatar");
-  avatar.innerHTML = "You";
-  messageRow.appendChild(userDiv);
-  messageRow.appendChild(avatar);
-  userDiv.classList.add("user-message");
-  userDiv.innerHTML = texto;
-  if (shouldAutoScroll()) {
-    container.scrollTop = container.scrollHeight;
+  input.value = '';
+
+  addLine('', '');
+  addLine('', `<span class="tag-user c-blue">you</span>   <span class="c-muted">${now()}</span>`);
+  addLine('c-white', `  ${texto}`);
+  addLine('', '');
+
+  if (texto === '/clear') {
+    output.innerHTML = '';
+    addLine('c-green', '  terminal limpo.');
+    addLine('', '');
+    return;
   }
-  clearInput();
 
-  dots();
-  setTimeout(() => handleChat(texto), 800);
+  if (texto === '/help') {
+    addLine('', `<span class="tag-ai c-purple">pitaya</span> <span class="c-muted">${now()}</span>`);
+    addLine('c-green', '  comandos disponíveis:');
+    addLine('c-muted', '  /help    · lista de comandos');
+    addLine('c-muted', '  /clear   · limpa o terminal');
+    addLine('', '');
+    return;
+  }
+
+  startSpinner();
+
+  const delay = 900 + Math.random() * 500;
+  setTimeout(() => {
+    stopSpinner();
+    handleChat(texto);
+  }, delay);
 }
 
-let waitingResponseDiv = null;
-function dots() {
-  waitingResponseDiv = document.createElement("div");
-  waitingResponseDiv.classList.add("dots");
-  const dot1 = document.createElement("span");
-  const dot2 = document.createElement("span");
-  const dot3 = document.createElement("span");
-  dot1.classList.add("dot");
-  dot2.classList.add("dot");
-  dot3.classList.add("dot");
-  dot1.innerHTML = "•";
-  dot2.innerHTML = "•";
-  dot3.innerHTML = "•";
-  waitingResponseDiv.appendChild(dot1);
-  waitingResponseDiv.appendChild(dot2);
-  waitingResponseDiv.appendChild(dot3);
-  const avatar = document.createElement("div");
-  avatar.classList.add("avatar");
-  avatar.innerHTML = "Pita";
-  const messageRow = document.createElement("div");
-  messageRow.classList.add("message-row-bot");
-  messageRow.classList.add("waiting-response");
-  messageRow.appendChild(avatar);
-  messageRow.appendChild(waitingResponseDiv);
-  container.appendChild(messageRow);
-}
-
-// Lógica principal do chat com Groq
 async function handleChat(texto) {
   const whoImData = await carregarWhoIm();
 
-  // Primeira vez → adiciona o system prompt correto
   if (messages.length === 0) {
     messages.push({
       role: "system",
@@ -97,18 +111,13 @@ async function handleChat(texto) {
     });
   }
 
-  // Adiciona mensagem do usuário no histórico
   messages.push({
     role: "user",
     content: texto,
   });
 
-  // Chama a API da Groq
   const botResponse = await getBotResponse();
-
-  // Mostra resposta da Pitaya
   sendBotMessage(botResponse);
-  container.removeChild(document.querySelector(".waiting-response"));
 }
 
 async function getBotResponse() {
@@ -123,7 +132,7 @@ async function getBotResponse() {
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
-        messages: messages, // agora com histórico completo
+        messages: messages,
         temperature: 0.9,
         max_tokens: 1024,
       }),
@@ -138,7 +147,6 @@ async function getBotResponse() {
   const data = await response.json();
   const resposta = data.choices[0].message.content;
 
-  // Salva resposta no histórico
   messages.push({
     role: "assistant",
     content: resposta,
@@ -147,51 +155,24 @@ async function getBotResponse() {
   return resposta;
 }
 
-function shouldAutoScroll() {
-  const threshold = 100;
-  return (
-    container.scrollHeight - container.scrollTop - container.clientHeight <
-    threshold
-  );
+function sendBotMessage(botMessage) {
+  addLine('', '');
+  addLine('', `<span class="tag-ai c-purple">pitaya</span> <span class="c-muted">${now()}</span>`);
+  const lines = botMessage.split('\n').map(line => ({
+    cls: 'c-white',
+    text: '  ' + mdToHtml(line)
+  }));
+  typeLines(lines);
+  setTimeout(() => addLine('', ''), lines.length * 80 + 100);
 }
 
-function sendBotMessage(botMenssage) {
-  const botDiv = document.createElement("div");
-  const avatar = document.createElement("div");
-  const messageRow = document.createElement("div");
-  messageRow.classList.add("message-row-bot");
-  container.appendChild(messageRow);
-  avatar.classList.add("avatar");
-  avatar.innerHTML = "Pita";
-  messageRow.appendChild(avatar);
-  messageRow.appendChild(botDiv);
-  botDiv.classList.add("bot-message"); // deixa à esquerda
-
-  botDiv.innerHTML = mdToHtml(botMenssage);
-  if (shouldAutoScroll()) {
-    container.scrollTop = container.scrollHeight;
-  }
-}
-
-// Markdown simples corrigido
 function mdToHtml(texto) {
   return texto
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // bold
-    .replace(/\*(.*?)\*/g, "<em>$1</em>") // italic
-    .replace(/`(.*?)`/g, "<code>$1</code>"); // code
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/`(.*?)`/g, "<code>$1</code>");
 }
 
-function clearInput() {
-  document.getElementById("input").value = "";
-}
-
-function pulseVideo() {
-  const video = document.querySelector("video");
-  if (video) {
-    video.style.animation = "pulse 3s 2";
-    // remove a animação depois
-    setTimeout(() => {
-      video.style.animation = "";
-    }, 6000);
-  }
-}
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMessage();
+});
