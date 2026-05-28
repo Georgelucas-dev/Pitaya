@@ -30,6 +30,25 @@ router.get("/convos", async (req, res) => {
   }
 });
 
+router.get("/:conversationId", async (req, res) => {
+  const { conversationId } = req.params;
+
+  try {
+    const result = await pool.query(
+      "SELECT id, title, created_at FROM conversations WHERE id = $1",
+      [conversationId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Conversa não encontrada" });
+    }
+
+    res.json({ conversation: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 2. Rotas dinâmicas depois
 router.post("/:conversationId", async (req, res) => {
   const { conversationId } = req.params;

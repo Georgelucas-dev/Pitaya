@@ -29,10 +29,43 @@ function printUser(text) {
     console.log();
 }
 
+function mdToAnsi(text) {
+    const reset = "\x1b[0m";
+    const lines = text.split("\n");
+    const result = [];
+    let inCode = false;
+
+    for (const line of lines) {
+        if (line.startsWith("```")) {
+            inCode = !inCode;
+            if (inCode) {
+                result.push(colors.muted("  ┌─────────────────────────"));
+            } else {
+                result.push(colors.muted("  └─────────────────────────"));
+            }
+            continue;
+        }
+
+        if (inCode) {
+            result.push(`  \x1b[38;2;180;180;180m${line}${reset}`);
+            continue;
+        }
+
+        let processed = line
+            .replace(/\*\*(.*?)\*\*/g, `\x1b[1m$1${reset}`)
+            .replace(/\*(.*?)\*/g, `\x1b[3m$1${reset}`)
+            .replace(/`([^`]+)`/g, `\x1b[38;2;180;180;180m$1${reset}`);
+
+        result.push(colors.white(`  ${processed}`));
+    }
+
+    return result;
+}
+
 function printPitaya(text) {
     console.log();
     console.log(`${colors.purple("pitaya")} ${colors.muted(now())}`);
-    text.split("\n").forEach((line) => console.log(colors.white(`  ${line}`)));
+    mdToAnsi(text).forEach((line) => console.log(line));
     console.log();
 }
 
@@ -63,6 +96,7 @@ async function handleCommand(input) {
             "comandos disponíveis:\n" +
             "  /help           · lista de comandos\n" +
             "  /convos         · lista conversas anteriores\n" +
+            "  /resume <id>   · retoma uma conversa anterior\n" +
             "  /title <nome>   · nomeia a conversa atual\n" +
             "  /rm             · deleta a conversa atual\n" +
             "  /rm <id>        · deleta uma conversa específica\n" +
@@ -116,6 +150,21 @@ async function handleCommand(input) {
         } else {
             printSystem(`conversa [${targetId}] deletada.`);
         }
+        return;
+    }
+
+    if (text.startsWith("/resume ")) {
+        const id = text.slice(8).trim();
+        const data = await api(`/${id}`);
+
+        if (data.error) {
+            printSystem(`erro: ${data.error}`);
+            return;
+        }
+
+        conversationId = id;
+        const title = data.conversation.title || "(sem título)";
+        printSystem(`conversa [${id}] "${title}" retomada.`);
         return;
     }
 

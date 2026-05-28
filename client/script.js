@@ -129,6 +129,25 @@ async function sendMessage() {
     return;
   }
 
+  if (texto.startsWith('/resume ')) {
+    const id = texto.slice(8).trim();
+    const response = await fetch(`${API_BASE}/${id}`);
+    const data = await response.json();
+
+    if (data.error) {
+      addLine('c-red', `  erro: ${data.error}`);
+      addLine('', '');
+      return;
+    }
+
+    conversationId = id;
+    localStorage.setItem("pitaya_conversation_id", conversationId);
+    const title = data.conversation.title || "(sem título)";
+    addLine('c-green', `  conversa [${id}] "${title}" retomada.`);
+    addLine('', '');
+    return;
+  }
+
   input.value = '';
 
   addLine('', '');
@@ -150,6 +169,7 @@ async function sendMessage() {
     addLine('c-muted', '  /clear          · limpa o terminal');
     addLine('c-muted', '  /title <nome>   · nomeia a conversa atual');
     addLine('c-muted', '  /convos         · lista conversas anteriores');
+    addLine('c-muted', '  /resume <id>   · retoma uma conversa anterior');
     addLine('c-muted', '  /rm            · deleta a conversa atual');
     addLine('c-muted', '  /rm <id>       · deleta uma conversa específica');
     addLine('', '');
@@ -193,22 +213,40 @@ async function handleChat(texto) {
   }
 }
 
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function mdToHtml(text) {
+  // blocos de código (``` ```)
+  text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
+    return `<pre><code>${escapeHtml(code.trim())}</code></pre>`;
+  });
+  // bold
+  text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  // itálico
+  text = text.replace(/\*(.*?)\*/g, "<em>$1</em>");
+  // inline code
+  text = text.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+  return text;
+}
+
 function sendBotMessage(botMessage) {
   addLine('', '');
   addLine('', `<span class="tag-ai c-purple">pitaya</span> <span class="c-muted">${now()}</span>`);
-  const lines = botMessage.split('\n').map(line => ({
-    cls: 'c-white',
-    text: '  ' + mdToHtml(line)
-  }));
-  typeLines(lines);
-  setTimeout(() => addLine('', ''), lines.length * 80 + 100);
-}
 
-function mdToHtml(texto) {
-  return texto
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.*?)\*/g, "<em>$1</em>")
-    .replace(/`(.*?)`/g, "<code>$1</code>");
+  const rendered = mdToHtml(botMessage);
+  const d = document.createElement('div');
+  d.className = 'line c-white bot-message';
+  d.innerHTML = rendered;
+  output.appendChild(d);
+
+  document.getElementById('output').scrollTop = output.scrollHeight;
+  setTimeout(() => addLine('', ''), 100);
 }
 
 input.addEventListener('keydown', e => {
