@@ -1,0 +1,282 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-background-secondary: #0d0d0d;
+  --border-radius-lg: 12px;
+  --font-mono: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #2a2a2a;
+  border-radius: 4px;
+}
+
+body {
+  background: #0d0d0d;
+  font-family: var(--font-mono);
+  color: #d4d4d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.25rem;
+}
+
+.wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.terminal {
+  background: #0d0d0d;
+  border-radius: var(--border-radius-lg);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  border: 0.5px solid #2a2a2a;
+  width: 100%;
+  max-width: 800px;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.titlebar {
+  background: #1a1a1a;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 0.5px solid #2a2a2a;
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+}
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.dot-r {
+  background: #ff5f57;
+}
+.dot-y {
+  background: #febc2e;
+}
+.dot-g {
+  background: #28c840;
+}
+
+.title-text {
+  font-size: 12px;
+  color: #666;
+  flex: 1;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.output {
+  padding: 16px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.line {
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.c-dim {
+  color: #444;
+}
+.c-muted {
+  color: #666;
+}
+.c-white {
+  color: #d4d4d4;
+}
+.c-green {
+  color: #4ec994;
+}
+.c-blue {
+  color: #569cd6;
+}
+.c-yellow {
+  color: #dcdcaa;
+}
+.c-cyan {
+  color: #9cdcfe;
+}
+.c-orange {
+  color: #ce9178;
+}
+.c-purple {
+  color: #c586c0;
+}
+.c-red {
+  color: #f44747;
+}
+
+.prompt-line {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 4px;
+}
+
+.prompt-symbol {
+  color: #4ec994;
+  font-size: 13px;
+  user-select: none;
+}
+
+.input-area {
+  padding: 10px 20px 16px;
+  border-top: 0.5px solid #1e1e1e;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0d0d0d;
+}
+
+.prompt-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #d4d4d4;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  flex: 1;
+  caret-color: #4ec994;
+}
+
+.prompt-input::placeholder {
+  color: #444;
+}
+
+.send-hint {
+  font-size: 11px;
+  color: #444;
+  font-family: var(--font-mono);
+}
+
+.spinner-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spin-char {
+  color: #4ec994;
+  font-size: 13px;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 14px;
+  background: #4ec994;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+  margin-left: 1px;
+}
+
+.tag-user {
+  color: #569cd6;
+}
+.tag-ai {
+  color: #c586c0;
+}
+.tag-sys {
+  color: #dcdcaa;
+}
+
+/* Code styling within messages */
+.line strong {
+  color: #dcdcaa;
+  font-weight: 600;
+}
+
+.line em {
+  color: #9cdcfe;
+  font-style: italic;
+}
+
+.line code {
+  color: #ce9178;
+  background: rgba(206, 145, 120, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+@media (max-width: 900px) {
+  .terminal {
+    max-width: 90%;
+    height: 85vh;
+  }
+
+  .output {
+    padding: 12px 16px;
+  }
+
+  .line {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .terminal {
+    max-width: 95%;
+    height: 90vh;
+    border-radius: 8px;
+  }
+
+  .line {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .output {
+    padding: 10px 12px;
+  }
+
+  .input-area {
+    padding: 8px 12px;
+  }
+
+  .title-text {
+    font-size: 10px;
+  }
+}

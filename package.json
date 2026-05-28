@@ -1,0 +1,21 @@
+{
+  "name": "pitaya",
+  "version": "1.0.0",
+  "description": "Pitaya chatbot — fullstack",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "shared",
+    "terminal"
+  ],
+  "scripts": {
+    "dev": "node server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Georgelucas-dev/Pitaya.git"
+  },
+  "author": "",
+  "license": "ISC"
+}
