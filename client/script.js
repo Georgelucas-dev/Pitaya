@@ -173,12 +173,26 @@ async function handleChat(texto) {
     });
 
     const data = await response.json();
+
+    if (data.audio) {
+      const binary = atob(data.audio);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: "audio/wav" });
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.play();
+    }
+
     sendBotMessage(data.reply);
   } catch (err) {
     sendBotMessage("Que ódio, deu um erro aqui 😭 tenta de novo");
     console.error(err);
   }
 }
+
 function sendBotMessage(botMessage) {
   addLine('', '');
   addLine('', `<span class="tag-ai c-purple">pitaya</span> <span class="c-muted">${now()}</span>`);
