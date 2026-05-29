@@ -1,6 +1,15 @@
 #!/usr/bin/env node
 import readline from "readline";
 import { loadTheme, buildColors } from "./theme.js";
+import { runAgent } from "./agent.js";
+
+import { config } from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+config({ path: join(__dirname, "../.env"), quiet: true });
+
 
 
 const theme = loadTheme();
@@ -168,9 +177,31 @@ async function handleCommand(input) {
         return;
     }
 
-    // mensagem normal
-    const data = await api(`/${conversationId}`, "POST", { message: text });
-    printPitaya(data.reply);
+    const historyData = await api(`/${conversationId}/history`);
+
+    if (!historyData.systemPrompt) {
+        printSystem("erro: system prompt não encontrado. tente /resume com uma conversa existente ou reinicie.");
+        return;
+    }
+
+    const fullMessages = [
+        { role: "system", content: historyData.systemPrompt },
+        ...historyData.messages,
+        { role: "user", content: text },
+    ];
+
+    try {
+        const reply = await runAgent(fullMessages);
+
+        await api(`/${conversationId}/save`, "POST", {
+            userMessage: text,
+            assistantMessage: reply,
+        });
+
+        printPitaya(reply);
+    } catch (err) {
+        printPitaya(err.message);
+    }
 }
 
 function prompt() {
@@ -201,13 +232,13 @@ async function main() {
 ╚═╝     ╚═╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝`);
 
     const info = [
-        `${colors.muted("  version  ")}${colors.white("4.0.0")}`,
-        `${colors.muted("  model    ")}${colors.white("llama-3.3-70b-versatile")}`,
-        `${colors.muted("  persona  ")}${colors.purple("pitaya")}`,
-        `${colors.muted("  server   ")}${colors.green("● running on port 3000")}`,
-        `${colors.muted("  Made by  ")}${colors.white("George Lucas")}`,
-        `\n${colors.muted("  ────────────────────────────────────────")}`,
-        `\n${colors.muted("  type ")}${colors.white("/help")}${colors.muted(" for commands")}`,
+        `${colors.muted("  version  ")}${colors.white("4.0.0")} `,
+        `${colors.muted("  model    ")}${colors.white("llama-3.3-70b-versatile")} `,
+        `${colors.muted("  persona  ")}${colors.purple("pitaya")} `,
+        `${colors.muted("  server   ")}${colors.green("● running on port 3000")} `,
+        `${colors.muted("  Made by  ")}${colors.white("George Lucas")} `,
+        `\n${colors.muted("  ────────────────────────────────────────")} `,
+        `\n${colors.muted("  type ")}${colors.white("/help")}${colors.muted(" for commands")} `,
     ].join("\n");
 
     console.log(logo);

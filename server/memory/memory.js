@@ -18,16 +18,22 @@ export async function saveMessage(conversationId, role, content) {
 export async function getMessages(conversationId) {
   const result = await pool.query(
     `SELECT m.role, m.content, p.system_prompt
-     FROM messages m
-     JOIN conversations c ON c.id = m.conversation_id
+     FROM conversations c
      JOIN personas p ON p.id = c.persona_id
-     WHERE m.conversation_id = $1
+     LEFT JOIN messages m ON m.conversation_id = c.id
+     WHERE c.id = $1
      ORDER BY m.created_at ASC`,
     [conversationId]
   );
 
-  const systemPrompt = result.rows[0]?.system_prompt;
-  const history = result.rows.map(({ role, content }) => ({ role, content }));
+  if (result.rows.length === 0) {
+    throw new Error(`Conversa ${conversationId} não encontrada`);
+  }
+
+  const systemPrompt = result.rows[0].system_prompt;
+  const history = result.rows
+    .filter((r) => r.role !== null)
+    .map(({ role, content }) => ({ role, content }));
 
   return { history, systemPrompt };
 }

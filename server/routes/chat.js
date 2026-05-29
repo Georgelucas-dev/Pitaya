@@ -49,6 +49,28 @@ router.get("/:conversationId", async (req, res) => {
   }
 });
 
+router.post("/:conversationId/save", async (req, res) => {
+  const { conversationId } = req.params;
+  const { userMessage, assistantMessage } = req.body;
+  try {
+    await saveMessage(conversationId, "user", userMessage);
+    await saveMessage(conversationId, "assistant", assistantMessage);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/:conversationId/history", async (req, res) => {
+  const { conversationId } = req.params;
+  try {
+    const { history, systemPrompt } = await getMessages(conversationId);
+    res.json({ messages: history, systemPrompt });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 2. Rotas dinâmicas depois
 router.post("/:conversationId", async (req, res) => {
   const { conversationId } = req.params;
