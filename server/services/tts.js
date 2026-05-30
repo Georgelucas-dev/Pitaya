@@ -14,7 +14,6 @@ export async function textToSpeech(text) {
         const piper = spawn("piper-tts", [
             "--model", MODEL,
             "--output_file", outputPath,
-            "--length_scale", "0.82",
         ]);
 
         let stderr = "";

@@ -264,6 +264,31 @@ body {
 .bot-message strong { color: #fff; font-weight: 600; }
 .bot-message em { color: #aaa; font-style: italic; }
 
+#mic-btn {
+  background: none;
+  border: none;
+  color: var(--c-muted, #555);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+#mic-btn:hover {
+  color: var(--c-green, #3fb950);
+}
+
+#mic-btn.listening {
+  color: #e05555;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 @media (max-width: 900px) {
   .terminal {
     max-width: 90%;

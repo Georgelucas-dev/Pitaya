@@ -7,6 +7,7 @@ import { setTerminalRl } from "./agent.js";
 import { config } from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { transcribeAudio, recordAudio, speakText } from "./listen.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 config({ path: join(__dirname, "../.env"), quiet: true });
@@ -20,8 +21,8 @@ let conversationId = null;
 
 
 const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
+    input: process.stdin,
+    output: process.stdout,
 });
 
 setTerminalRl(rl);
@@ -98,6 +99,8 @@ async function initConversation() {
     conversationId = data.conversationId;
 }
 
+let listenMode = false;
+
 async function handleCommand(input) {
     const text = input.trim();
 
@@ -110,6 +113,7 @@ async function handleCommand(input) {
             "  /title <nome>   · nomeia a conversa atual\n" +
             "  /rm             · deleta a conversa atual\n" +
             "  /rm <id>        · deleta uma conversa específica\n" +
+            "  /listen        · ativa/desativa modo escuta contínua\n" +
             "  /exit           · encerra o terminal"
         );
         return;
@@ -178,6 +182,21 @@ async function handleCommand(input) {
         return;
     }
 
+
+
+    // no handleCommand, antes da mensagem normal:
+    if (text === "/listen") {
+        listenMode = !listenMode;
+
+        if (listenMode) {
+            printSystem("modo escuta ativado. fala quando quiser. /listen pra parar.");
+            listenLoop();
+        } else {
+            printSystem("modo escuta desativado.");
+        }
+        return;
+    }
+
     const historyData = await api(`/${conversationId}/history`);
 
     if (!historyData.systemPrompt) {
@@ -202,6 +221,44 @@ async function handleCommand(input) {
         printPitaya(reply);
     } catch (err) {
         printPitaya(err.message);
+    }
+}
+
+async function listenLoop() {
+    while (listenMode) {
+        try {
+            process.stdout.write(colors.muted("  🎙  ouvindo...\r"));
+            const audioPath = await recordAudio();
+
+            const transcript = await transcribeAudio(audioPath);
+
+            try { import("fs").then(fs => fs.unlinkSync(audioPath)); } catch { }
+
+            if (!transcript || transcript.length < 2) continue;
+
+            process.stdout.write("\x1b[2K\r");
+            printUser(transcript);
+
+            const historyData = await api(`/${conversationId}/history`);
+            const fullMessages = [
+                { role: "system", content: historyData.systemPrompt },
+                ...historyData.messages,
+                { role: "user", content: transcript },
+            ];
+
+            const reply = await runAgent(fullMessages);
+
+            await api(`/${conversationId}/save`, "POST", {
+                userMessage: transcript,
+                assistantMessage: reply,
+            });
+
+            printPitaya(reply);
+            await speakText(reply);
+
+        } catch (err) {
+            if (listenMode) printSystem(`erro: ${err.message}`);
+        }
     }
 }
 

@@ -4,18 +4,27 @@ const input = document.getElementById('input');
 const API_BASE = "http://localhost:3000/api/chat";
 let conversationId = null;
 
-async function initConversation() {
+async function initConversation(persona = "pitaya") {
   const saved = localStorage.getItem("pitaya_conversation_id");
 
   if (saved) {
-    conversationId = saved;
-    return;
+    // verifica se a conversa ainda existe
+    const response = await fetch(`${API_BASE}/${saved}`);
+    const data = await response.json();
+
+    if (!data.error) {
+      conversationId = saved;
+      return;
+    }
+
+    // conversa não existe mais, limpa o localStorage
+    localStorage.removeItem("pitaya_conversation_id");
   }
 
   const response = await fetch(`${API_BASE}/start`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ persona: "pitaya" }),
+    body: JSON.stringify({ persona }),
   });
 
   const data = await response.json();
@@ -254,3 +263,41 @@ input.addEventListener('keydown', e => {
 });
 
 initConversation();
+
+const micBtn = document.getElementById("mic-btn");
+let recognition = null;
+
+if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    micBtn.classList.remove("listening");
+    input.value = transcript;
+    sendMessage();
+  };
+
+  recognition.onerror = () => {
+    micBtn.classList.remove("listening");
+  };
+
+  recognition.onend = () => {
+    micBtn.classList.remove("listening");
+  };
+
+  micBtn.addEventListener("click", () => {
+    if (micBtn.classList.contains("listening")) {
+      recognition.stop();
+      micBtn.classList.remove("listening");
+    } else {
+      recognition.start();
+      micBtn.classList.add("listening");
+    }
+  });
+} else {
+  micBtn.style.display = "none";
+}
