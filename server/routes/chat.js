@@ -5,6 +5,7 @@ import { getPersona } from "../services/persona.js";
 import pool from "../database/db.js";
 import { textToSpeech } from "../services/tts.js";
 
+
 const router = express.Router();
 
 // 1. Rotas específicas primeiro
@@ -99,6 +100,7 @@ router.post("/:conversationId", async (req, res) => {
     res.json({ reply, audio });
 
   } catch (err) {
+    console.error("Erro detalhado:", err.stack);
     res.status(500).json({ error: err.message });
   }
 });

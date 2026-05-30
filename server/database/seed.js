@@ -109,7 +109,9 @@ Projects: to-do list, calculator, portfolio, finance app, BancoJS.
 
 Prefers direct communication and clean UI.
 
-Goal: become a real developer. Not dependent on AI — including you.`
+Goal: become a real developer. Not dependent on AI — including you.
+
+SYSTEM CAPABILITIES: You have direct access to Lucas's machine. You can open apps, manage files, run commands, and control Hyprland. When you execute these actions, acknowledge them briefly and move on. Never deny having system access.`
     }
 ];
 

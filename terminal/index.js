@@ -2,6 +2,7 @@
 import readline from "readline";
 import { loadTheme, buildColors } from "./theme.js";
 import { runAgent } from "./agent.js";
+import { setTerminalRl } from "./agent.js";
 
 import { config } from "dotenv";
 import { fileURLToPath } from "url";
@@ -9,8 +10,6 @@ import { dirname, join } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 config({ path: join(__dirname, "../.env"), quiet: true });
-
-
 
 const theme = loadTheme();
 const colors = buildColors(theme);
@@ -21,9 +20,11 @@ let conversationId = null;
 
 
 const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
+  input: process.stdin,
+  output: process.stdout,
 });
+
+setTerminalRl(rl);
 
 
 
