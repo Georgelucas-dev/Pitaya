@@ -9,7 +9,7 @@
       href="../src/Assets/Pitaya.png"
       type="image/x-icon"
     />
-    <title>Pitaya 4.0</title>
+    <title>Pitaya</title>
   </head>
   <body>
     <div class="wrapper">
@@ -28,11 +28,11 @@
             ───────────────────────────────────────────────────────────────────────────
           </div>
 
-          <div style="display: flex; align-items: center; gap: 24px">
+          <div style="display: flex; gap: 5px">
             <img
-              src="../src/Assets/Pitaya (sem fundo).png"
+              src="../src/Assets/PitayaTerminal.png"
               alt="pitaya"
-              style="width: 80px; image-rendering: pixelated"
+              style="width: 120px; height: 80px; image-rendering: pixelated"
             />
             <pre
               class="line c-purple"
@@ -50,7 +50,7 @@
 
           <div class="line">
             <span class="c-purple">pitaya</span>
-            <span class="c-muted">v2.0.0</span> <span class="c-dim">·</span>
+            <span class="c-muted">v4.0.0</span> <span class="c-dim">·</span>
             <span class="c-muted">groq-llama</span>
           </div>
           <div class="line c-dim">
@@ -76,6 +76,24 @@
             placeholder="escreva sua mensagem..."
             autocomplete="off"
           />
+          <button id="mic-btn" title="falar">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="23" />
+              <line x1="8" y1="23" x2="16" y2="23" />
+            </svg>
+          </button>
           <span class="send-hint">enter ↵</span>
         </div>
       </div>
